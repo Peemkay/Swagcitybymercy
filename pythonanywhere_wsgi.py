@@ -15,8 +15,7 @@ import os
 import sys
 
 # --- 1. Point to your project folder -----------------------------------------
-# Replace "swagcitybymercy" with your PythonAnywhere username if different.
-project_home = "/home/swagcitybymercy/swagcity_project"
+project_home = "/home/Swagcity/swagcity_project"
 if project_home not in sys.path:
     sys.path.insert(0, project_home)
 
@@ -25,8 +24,8 @@ if project_home not in sys.path:
 #   python manage.py shell -c "from django.core.management.utils import get_random_secret_key as k; print(k())"
 os.environ["DJANGO_SECRET_KEY"] = "PASTE-YOUR-50-CHAR-RANDOM-KEY-HERE"
 os.environ["DJANGO_DEBUG"] = "False"
-os.environ["DJANGO_ALLOWED_HOSTS"] = "swagcitybymercy.pythonanywhere.com"
-os.environ["DJANGO_CSRF_TRUSTED_ORIGINS"] = "https://swagcitybymercy.pythonanywhere.com"
+os.environ["DJANGO_ALLOWED_HOSTS"] = "swagcity.pythonanywhere.com"
+os.environ["DJANGO_CSRF_TRUSTED_ORIGINS"] = "https://swagcity.pythonanywhere.com"
 os.environ["DJANGO_SECURE_SSL_REDIRECT"] = "True"
 os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings"
 

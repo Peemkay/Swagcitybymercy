@@ -1,7 +1,7 @@
 # Deploying Swagcitybymercy to PythonAnywhere
 
 Step-by-step guide to host this Django site on a PythonAnywhere account whose
-site will live at **https://swagcitybymercy.pythonanywhere.com**.
+site will live at **https://swagcity.pythonanywhere.com**.
 
 > Free ("Beginner") accounts work fine for this. As of the January 2026
 > pricing changes, new free accounts get: 512 MiB disk, 100 CPU-seconds/day,
@@ -51,7 +51,7 @@ pip install -r requirements.txt
 ```bash
 # still inside the activated venv, in ~/swagcity_project
 export DJANGO_DEBUG=False
-export DJANGO_ALLOWED_HOSTS=swagcitybymercy.pythonanywhere.com
+export DJANGO_ALLOWED_HOSTS=swagcity.pythonanywhere.com
 
 python manage.py migrate
 python manage.py createsuperuser      # your real admin login
@@ -67,22 +67,22 @@ python manage.py collectstatic --noinput
 1. Go to the **Web** tab → **Add a new web app**.
 2. Choose **Manual configuration** (NOT "Django") → pick the same Python
    version you used for the venv (e.g. 3.10).
-3. This creates the app at `swagcitybymercy.pythonanywhere.com`.
+3. This creates the app at `swagcity.pythonanywhere.com`.
 
 Then on the same Web tab, fill in:
 
 | Field | Value |
 |-------|-------|
-| **Source code** | `/home/swagcitybymercy/swagcity_project` |
-| **Working directory** | `/home/swagcitybymercy/swagcity_project` |
-| **Virtualenv** | `/home/swagcitybymercy/swagcity_project/venv` |
+| **Source code** | `/home/Swagcity/swagcity_project` |
+| **Working directory** | `/home/Swagcity/swagcity_project` |
+| **Virtualenv** | `/home/Swagcity/swagcity_project/venv` |
 
 ---
 
 ## 5. Configure the WSGI file
 
 On the Web tab, click the **WSGI configuration file** link
-(`/var/www/swagcitybymercy_pythonanywhere_com_wsgi.py`).
+(`/var/www/swagcity_pythonanywhere_com_wsgi.py`).
 
 Delete everything in it and paste the contents of
 [`pythonanywhere_wsgi.py`](pythonanywhere_wsgi.py) from this repo. Then edit:
@@ -103,8 +103,8 @@ Still on the Web tab, under **Static files**, add two mappings:
 
 | URL | Directory |
 |-----|-----------|
-| `/static/` | `/home/swagcitybymercy/swagcity_project/staticfiles` |
-| `/media/`  | `/home/swagcitybymercy/swagcity_project/media` |
+| `/static/` | `/home/Swagcity/swagcity_project/staticfiles` |
+| `/media/`  | `/home/Swagcity/swagcity_project/media` |
 
 (WhiteNoise still works as a fallback, so the site won't break if you skip
 this — but the proxy mapping is faster and offloads the app worker.)
@@ -115,7 +115,7 @@ this — but the proxy mapping is faster and offloads the app worker.)
 
 1. On the Web tab, enable **Force HTTPS** (and **HSTS** if offered).
 2. Click the big green **Reload** button.
-3. Visit **https://swagcitybymercy.pythonanywhere.com/** and
+3. Visit **https://swagcity.pythonanywhere.com/** and
    **/admin/** to confirm it's live.
 
 ---
@@ -159,7 +159,7 @@ Then hit **Reload** on the Web tab.
   Web tab's **Force HTTPS** instead.
 - **CSS/images missing** → re-run `collectstatic` and check the `/static/`
   mapping path, then reload.
-- **Anything 500** → read `/var/log/swagcitybymercy.pythonanywhere.com.error.log`
+- **Anything 500** → read `/var/log/swagcity.pythonanywhere.com.error.log`
   (linked from the Web tab).
 
 ## Note on data persistence
