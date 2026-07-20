@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}About Us{% endblock %}
+{% block content %}
+<section class="container py-5" style="max-width:760px;">
+    <div class="section-title">
+        <h2>About {{ site_settings.site_name }}</h2>
+    </div>
+    <p>
+        {{ site_settings.about_text|default:"Swagcitybymercy is a Lagos-based online fashion boutique specializing in quality, luxury female apparel — chic dresses, blouse dresses, and accessories for the modern woman." }}
+    </p>
+    <p>Every piece in our catalog is chosen for its quality and fit, so you can shop with confidence. Orders are packaged with care and shipped promptly from Lagos.</p>
+    <div class="row text-center mt-5 g-4">
+        <div class="col-md-4">
+            <h6 class="text-uppercase small">Lagos</h6>
+            <p class="small text-muted">{{ site_settings.lagos_delivery_note }}</p>
+        </div>
+        <div class="col-md-4">
+            <h6 class="text-uppercase small">Other Regions</h6>
+            <p class="small text-muted">{{ site_settings.other_regions_delivery_note }}</p>
+        </div>
+        <div class="col-md-4">
+            <h6 class="text-uppercase small">International</h6>
+            <p class="small text-muted">{{ site_settings.international_delivery_note }}</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

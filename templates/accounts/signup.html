@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Create an Account{% endblock %}
+{% block content %}
+<section class="container py-5" style="max-width:480px;">
+    <div class="section-title">
+        <h2>Create an Account</h2>
+        <p>Track your orders and check out faster.</p>
+    </div>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label small text-uppercase">First Name</label>
+                {{ form.first_name }}
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small text-uppercase">Last Name</label>
+                {{ form.last_name }}
+            </div>
+            <div class="col-12">
+                <label class="form-label small text-uppercase">Email</label>
+                {{ form.email }}
+            </div>
+            <div class="col-12">
+                <label class="form-label small text-uppercase">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}<div class="small text-danger">{{ form.username.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+                <label class="form-label small text-uppercase">Password</label>
+                {{ form.password1 }}
+                {% if form.password1.errors %}<div class="small text-danger">{{ form.password1.errors|striptags }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+                <label class="form-label small text-uppercase">Confirm Password</label>
+                {{ form.password2 }}
+                {% if form.password2.errors %}<div class="small text-danger">{{ form.password2.errors|striptags }}</div>{% endif %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-scm w-100 mt-4">Sign Up</button>
+    </form>
+    <p class="text-center small mt-3">Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
+</section>
+{% endblock %}

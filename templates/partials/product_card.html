@@ -1,0 +1,34 @@
+{% load humanize %}
+<div class="col-6 col-md-4 col-lg-3">
+    <div class="product-card">
+        <a href="{{ product.get_absolute_url }}">
+            <div class="img-wrap">
+                {% if not product.is_in_stock %}
+                    <span class="badge-stock out">Sold Out</span>
+                {% elif product.total_stock <= 3 %}
+                    <span class="badge-stock low">Low Stock</span>
+                {% endif %}
+                {% with img=product.primary_image %}
+                    {% if img %}
+                        <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}">
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center h-100 text-muted small">No image yet</div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </a>
+        <div class="body">
+            <div class="cat">{{ product.category.name }}</div>
+            <a href="{{ product.get_absolute_url }}"><div class="name">{{ product.name }}</div></a>
+            {% with pr=product.price_range %}
+                <div class="price">
+                    {% if pr.0 == pr.1 %}
+                        &#8358;{{ pr.0|floatformat:0|intcomma }}
+                    {% else %}
+                        &#8358;{{ pr.0|floatformat:0|intcomma }} &ndash; &#8358;{{ pr.1|floatformat:0|intcomma }}
+                    {% endif %}
+                </div>
+            {% endwith %}
+        </div>
+    </div>
+</div>

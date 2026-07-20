@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ site_settings.site_name }} &mdash; Luxury Female Apparel{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="cat mb-2" style="letter-spacing:.15em;text-transform:uppercase;font-size:.8rem;color:var(--scm-blush-dark)">Lagos, Nigeria</div>
+        <h1>Effortlessly Chic,<br>Unmistakably You</h1>
+        <p class="lead">{{ site_settings.about_text|default:"Quality, luxury dresses, blouse dresses and accessories crafted for the modern woman." }}</p>
+        <a href="{% url 'catalog:shop' %}" class="btn btn-scm">Shop The Collection</a>
+    </div>
+</section>
+
+{% if categories %}
+<section class="container py-5">
+    <div class="section-title">
+        <h2>Shop by Category</h2>
+        <p>Find your next statement piece</p>
+    </div>
+    <div class="text-center">
+        {% for category in categories %}
+            <a href="{% url 'catalog:category_detail' category.slug %}" class="category-pill">{{ category.name }}</a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="container py-5">
+    <div class="section-title">
+        <h2>New &amp; Loved</h2>
+        <p>Handpicked pieces our customers can't get enough of</p>
+    </div>
+    <div class="row g-4">
+        {% for product in featured_products %}
+            {% include "partials/product_card.html" %}
+        {% empty %}
+            <p class="text-center text-muted">New styles are on their way &mdash; check back soon.</p>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-5">
+        <a href="{% url 'catalog:shop' %}" class="btn btn-scm-outline">View All Styles</a>
+    </div>
+</section>
+
+<section class="container py-5">
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <i class="bi bi-truck fs-2 mb-2 d-block"></i>
+            <h6 class="text-uppercase small">Fast Lagos Delivery</h6>
+            <p class="small text-muted">{{ site_settings.lagos_delivery_note }}</p>
+        </div>
+        <div class="col-md-4">
+            <i class="bi bi-bank fs-2 mb-2 d-block"></i>
+            <h6 class="text-uppercase small">Secure Bank Transfer</h6>
+            <p class="small text-muted">Pay directly into our Naira account &mdash; simple &amp; secure.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="bi bi-gem fs-2 mb-2 d-block"></i>
+            <h6 class="text-uppercase small">Quality Guaranteed</h6>
+            <p class="small text-muted">Every piece is checked for quality before it ships.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

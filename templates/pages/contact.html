@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Contact Us{% endblock %}
+{% block content %}
+<section class="container py-5" style="max-width:640px;">
+    <div class="section-title">
+        <h2>Get In Touch</h2>
+        <p>Questions about an order or a style? Send us a message.</p>
+    </div>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">{{ form.name }}</div>
+        <div class="mb-3">{{ form.email }}</div>
+        <div class="mb-3">{{ form.message }}</div>
+        <button type="submit" class="btn btn-scm w-100">Send Message</button>
+    </form>
+    {% if site_settings.whatsapp_number %}
+    <p class="text-center mt-4">
+        Prefer WhatsApp? <a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank">Chat with us directly</a>
+    </p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Order {{ order.order_number }}{% endblock %}
+{% block content %}
+<section class="container py-5" style="max-width:700px;">
+    <div class="section-title">
+        <h2>Thank You, {{ order.full_name|default:"" }}!</h2>
+        <p>Your order <strong>{{ order.order_number }}</strong> has been received.</p>
+    </div>
+
+    <div class="summary-box mb-4">
+        <div class="d-flex justify-content-between mb-2"><span>Subtotal</span><span>&#8358;{{ order.subtotal|floatformat:0|intcomma }}</span></div>
+        <div class="d-flex justify-content-between mb-2"><span>Shipping ({{ order.shipping_zone.name }})</span><span>&#8358;{{ order.shipping_fee|floatformat:0|intcomma }}</span></div>
+        <hr>
+        <div class="d-flex justify-content-between fw-semibold fs-5"><span>Total to Pay</span><span>&#8358;{{ order.total|floatformat:0|intcomma }}</span></div>
+        <p class="small text-muted mt-2 mb-0">Estimated delivery: {{ order.shipping_zone.delivery_estimate }}</p>
+    </div>
+
+    {% if order.bank_account %}
+    <h5>Pay by Bank Transfer</h5>
+    <div class="bank-card">
+        <div><strong>Bank:</strong> {{ order.bank_account.bank_name }}</div>
+        <div><strong>Account Name:</strong> {{ order.bank_account.account_name }}</div>
+        <div><strong>Account Number:</strong> {{ order.bank_account.account_number }}</div>
+    </div>
+    <p class="small text-muted">Please transfer the exact total above, then upload a screenshot of your payment below so we can confirm your order quickly.</p>
+    {% else %}
+    <p class="small text-muted">Please contact us for payment account details.</p>
+    {% endif %}
+
+    {% if order.payment_proof %}
+        <div class="alert alert-success mt-3">
+            Payment proof received on {{ order.payment_proof.uploaded_at }}. We'll confirm your order shortly.
+        </div>
+    {% else %}
+    <form method="post" action="{% url 'orders:upload_payment_proof' order.order_number %}" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        <h6 class="text-uppercase small mb-3">Upload Proof of Payment</h6>
+        <div class="mb-3">{{ proof_form.image }}</div>
+        <div class="mb-3">{{ proof_form.amount_paid }}</div>
+        <div class="mb-3">{{ proof_form.note }}</div>
+        <button type="submit" class="btn btn-scm w-100">Submit Payment Proof</button>
+    </form>
+    {% endif %}
+
+    <p class="text-center small text-muted mt-4">
+        Save your order number <strong>{{ order.order_number }}</strong> to
+        <a href="{% url 'orders:track_order' %}">track your order</a> later.
+    </p>
+</section>
+{% endblock %}

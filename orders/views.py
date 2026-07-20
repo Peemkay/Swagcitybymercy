@@ -1,0 +1,154 @@
+from decimal import Decimal
+
+from django.contrib import messages
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+
+from catalog.models import ProductVariant
+
+from .cart import Cart
+from .forms import CheckoutForm, PaymentProofForm
+from .models import BankAccount, Order, OrderItem
+
+
+def cart_detail(request):
+    cart = Cart(request)
+    return render(request, "orders/cart_detail.html", {"cart": cart})
+
+
+@require_POST
+def cart_add(request, variant_id):
+    cart = Cart(request)
+    variant = get_object_or_404(ProductVariant, id=variant_id)
+
+    if variant.is_out_of_stock:
+        messages.error(request, f"Sorry, {variant.product.name} ({variant.size.label}) is out of stock.")
+        return redirect(variant.product.get_absolute_url())
+
+    try:
+        quantity = int(request.POST.get("quantity", 1))
+    except (TypeError, ValueError):
+        quantity = 1
+    quantity = max(1, quantity)
+
+    cart.add(variant=variant, quantity=quantity)
+    messages.success(request, f"Added {variant.product.name} ({variant.size.label}) to your bag.")
+    return redirect("orders:cart_detail")
+
+
+@require_POST
+def cart_update(request, variant_id):
+    cart = Cart(request)
+    variant = get_object_or_404(ProductVariant, id=variant_id)
+    try:
+        quantity = int(request.POST.get("quantity", 1))
+    except (TypeError, ValueError):
+        quantity = 1
+    if quantity <= 0:
+        cart.remove(variant_id)
+    else:
+        cart.add(variant=variant, quantity=quantity, replace=True)
+    return redirect("orders:cart_detail")
+
+
+@require_POST
+def cart_remove(request, variant_id):
+    cart = Cart(request)
+    cart.remove(variant_id)
+    messages.info(request, "Item removed from your bag.")
+    return redirect("orders:cart_detail")
+
+
+def checkout(request):
+    cart = Cart(request)
+    if len(cart) == 0:
+        messages.warning(request, "Your bag is empty — add something before checking out.")
+        return redirect("catalog:shop")
+
+    if request.method == "POST":
+        form = CheckoutForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                # Re-validate stock inside the transaction to avoid overselling.
+                cart_items = list(cart)
+                for entry in cart_items:
+                    variant = ProductVariant.objects.select_for_update().get(id=entry["variant"].id)
+                    if variant.stock_quantity < entry["quantity"]:
+                        messages.error(
+                            request,
+                            f"Sorry, only {variant.stock_quantity} left of "
+                            f"{variant.product.name} ({variant.size.label}). Please update your bag.",
+                        )
+                        return redirect("orders:cart_detail")
+
+                order = form.save(commit=False)
+                if request.user.is_authenticated:
+                    order.customer = request.user
+                order.shipping_fee = order.shipping_zone.fee
+                order.bank_account = BankAccount.objects.filter(is_active=True).first()
+                order.save()
+
+                for entry in cart_items:
+                    variant = ProductVariant.objects.select_for_update().get(id=entry["variant"].id)
+                    OrderItem.objects.create(
+                        order=order,
+                        product_variant=variant,
+                        product_name=variant.product.name,
+                        size_label=variant.size.label,
+                        quantity=entry["quantity"],
+                        unit_price=entry["unit_price"],
+                    )
+                    variant.stock_quantity -= entry["quantity"]
+                    variant.save(update_fields=["stock_quantity"])
+
+                order.recalculate_totals()
+                cart.clear()
+
+            return redirect("orders:order_success", order_number=order.order_number)
+    else:
+        initial = {}
+        if request.user.is_authenticated:
+            initial = {"full_name": request.user.get_full_name(), "email": request.user.email}
+        form = CheckoutForm(initial=initial)
+
+    return render(request, "orders/checkout.html", {"form": form, "cart": cart})
+
+
+def order_success(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number)
+    proof_form = PaymentProofForm()
+    return render(request, "orders/order_success.html", {"order": order, "proof_form": proof_form})
+
+
+@require_POST
+def upload_payment_proof(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number)
+    if hasattr(order, "payment_proof"):
+        messages.info(request, "You've already uploaded proof of payment for this order. Our team will review it shortly.")
+        return redirect("orders:order_success", order_number=order.order_number)
+
+    form = PaymentProofForm(request.POST, request.FILES)
+    if form.is_valid():
+        proof = form.save(commit=False)
+        proof.order = order
+        proof.save()
+        order.status = Order.Status.PROOF_SUBMITTED
+        order.save(update_fields=["status"])
+        messages.success(request, "Thanks! We've received your payment proof and will confirm your order shortly.")
+    else:
+        messages.error(request, "There was a problem with your upload — please try again.")
+    return redirect("orders:order_success", order_number=order.order_number)
+
+
+def track_order(request):
+    order = None
+    searched = False
+    if request.method == "POST":
+        searched = True
+        order_number = request.POST.get("order_number", "").strip()
+        email = request.POST.get("email", "").strip()
+        order = Order.objects.filter(order_number__iexact=order_number, email__iexact=email).first()
+        if not order:
+            messages.error(request, "We couldn't find an order with those details. Please double-check and try again.")
+    return render(request, "orders/track_order.html", {"order": order, "searched": searched})

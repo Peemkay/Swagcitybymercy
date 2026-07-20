@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ site_settings.site_name }}{% endblock %} | {{ site_settings.tagline }}</title>
+    <meta name="description" content="{{ site_settings.tagline }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="announcement-bar">
+    Free styling advice on every order &middot; {{ site_settings.lagos_delivery_note }}
+</div>
+
+<header class="site-header">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'pages:home' %}">{{ site_settings.site_name }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav mx-auto main-nav">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'pages:home' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'catalog:shop' %}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'pages:about' %}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'orders:track_order' %}">Track Order</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'pages:contact' %}">Contact</a></li>
+                </ul>
+                <ul class="navbar-nav header-icons">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:dashboard' %}"><i class="bi bi-person"></i> My Account</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}"><i class="bi bi-person"></i> Login</a></li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'orders:cart_detail' %}">
+                            <i class="bi bi-bag"></i> Bag
+                            {% if cart_item_count %}<span class="cart-badge">{{ cart_item_count }}</span>{% endif %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-md-4">
+                <h5 class="footer-brand">{{ site_settings.site_name }}</h5>
+                <p>{{ site_settings.tagline }}</p>
+                {% if site_settings.instagram_handle %}
+                <a href="https://www.instagram.com/{{ site_settings.instagram_handle }}/" target="_blank" class="footer-social">
+                    <i class="bi bi-instagram"></i> @{{ site_settings.instagram_handle }}
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-md-4">
+                <h6>Delivery</h6>
+                <ul class="list-unstyled small">
+                    <li>Lagos: {{ site_settings.lagos_delivery_note }}</li>
+                    <li>Other regions: {{ site_settings.other_regions_delivery_note }}</li>
+                    <li>International: {{ site_settings.international_delivery_note }}</li>
+                </ul>
+            </div>
+            <div class="col-md-4">
+                <h6>Get in touch</h6>
+                <ul class="list-unstyled small">
+                    {% if site_settings.contact_phone %}<li><i class="bi bi-telephone"></i> {{ site_settings.contact_phone }}</li>{% endif %}
+                    {% if site_settings.contact_email %}<li><i class="bi bi-envelope"></i> {{ site_settings.contact_email }}</li>{% endif %}
+                    {% if site_settings.whatsapp_number %}
+                    <li><a href="https://wa.me/{{ site_settings.whatsapp_number }}" target="_blank"><i class="bi bi-whatsapp"></i> Chat on WhatsApp</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <hr>
+        <p class="text-center small mb-0">&copy; {% now "Y" %} {{ site_settings.site_name }}. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

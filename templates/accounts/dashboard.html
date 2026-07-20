@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}My Account{% endblock %}
+{% block content %}
+<section class="container py-5">
+    <div class="section-title">
+        <h2>My Orders</h2>
+        <p>Welcome back, {{ user.first_name|default:user.username }}.</p>
+    </div>
+
+    {% if orders %}
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.order_number }}</td>
+                    <td>{{ order.created_at|date:"jS M, Y" }}</td>
+                    <td><span class="status-pill">{{ order.get_status_display }}</span></td>
+                    <td class="text-end">&#8358;{{ order.total|floatformat:0|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <p class="text-center text-muted">You haven't placed any orders yet.</p>
+        <div class="text-center"><a href="{% url 'catalog:shop' %}" class="btn btn-scm">Start Shopping</a></div>
+    {% endif %}
+</section>
+{% endblock %}
