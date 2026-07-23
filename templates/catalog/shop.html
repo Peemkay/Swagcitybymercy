@@ -3,28 +3,50 @@
 
 {% block content %}
 <section class="container py-5">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>{% if current_category_obj %}{{ current_category_obj.name }}{% else %}Shop All{% endif %}</h2>
         <p>{% if current_category_obj %}{{ current_category_obj.description }}{% else %}Chic dresses, blouse dresses &amp; accessories{% endif %}</p>
     </div>
 
-    <div class="text-center mb-4">
+    <div class="text-center mb-4 reveal">
         <a href="{% url 'catalog:shop' %}" class="category-pill {% if not active_category %}active{% endif %}">All</a>
         {% for category in categories %}
             <a href="{% url 'catalog:category_detail' category.slug %}" class="category-pill {% if active_category == category.slug %}active{% endif %}">{{ category.name }}</a>
         {% endfor %}
     </div>
 
-    <form method="get" class="row justify-content-center g-2 mb-5" style="max-width:500px;margin:0 auto;">
+    <form method="get" class="row justify-content-center g-2 mb-4 reveal" style="max-width:500px;margin:0 auto;">
         <div class="col-8">
-            <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search styles...">
+            <input type="text" name="q" id="shopSearchInput" value="{{ query }}" class="form-control" placeholder="Search styles...">
         </div>
         <div class="col-4">
             <button class="btn btn-scm-outline w-100" type="submit">Search</button>
         </div>
     </form>
 
-    <div class="row g-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 reveal">
+        <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="favoritesOnlyToggle" {% if request.GET.favorites == '1' %}checked{% endif %}>
+            <label class="form-check-label small" for="favoritesOnlyToggle"><i class="bi bi-heart"></i> Favorites only</label>
+        </div>
+        <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="inStockToggle" {% if in_stock_only %}checked{% endif %}>
+            <label class="form-check-label small" for="inStockToggle">In stock only</label>
+        </div>
+        <div class="d-flex align-items-center gap-2 ms-auto">
+            <label class="small text-uppercase mb-0" for="sortSelect">Sort</label>
+            <select class="sort-select" id="sortSelect">
+                <option value="newest" {% if sort_key == "newest" %}selected{% endif %}>Newest</option>
+                <option value="price_low" {% if sort_key == "price_low" %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_high" {% if sort_key == "price_high" %}selected{% endif %}>Price: High to Low</option>
+                <option value="name" {% if sort_key == "name" %}selected{% endif %}>Name: A&ndash;Z</option>
+            </select>
+            <button type="button" class="view-toggle-btn active" id="gridViewBtn" aria-label="Grid view"><i class="bi bi-grid-3x3-gap"></i></button>
+            <button type="button" class="view-toggle-btn" id="listViewBtn" aria-label="List view"><i class="bi bi-list-ul"></i></button>
+        </div>
+    </div>
+
+    <div class="row g-4 shop-grid">
         {% for product in page_obj %}
             {% include "partials/product_card.html" %}
         {% empty %}
@@ -36,11 +58,11 @@
     <nav class="mt-5">
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_key %}&sort={{ sort_key }}{% endif %}">Previous</a></li>
             {% endif %}
             <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
             {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_key %}&sort={{ sort_key }}{% endif %}">Next</a></li>
             {% endif %}
         </ul>
     </nav>

@@ -6,14 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ site_settings.site_name }}{% endblock %} | {{ site_settings.tagline }}</title>
     <meta name="description" content="{{ site_settings.tagline }}">
+    <script>
+        (function () {
+            var saved = localStorage.getItem('scm-theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <noscript><style>.reveal { opacity: 1 !important; transform: none !important; }</style></noscript>
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body{% if request.resolver_match.url_name %} data-page="{{ request.resolver_match.url_name }}"{% endif %} {% block body_attrs %}{% endblock %}>
 
 <div class="announcement-bar">
     Free styling advice on every order &middot; {{ site_settings.lagos_delivery_note }}
@@ -34,7 +41,12 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'orders:track_order' %}">Track Order</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'pages:contact' %}">Contact</a></li>
                 </ul>
-                <ul class="navbar-nav header-icons">
+                <ul class="navbar-nav header-icons align-items-lg-center gap-lg-2">
+                    <li class="nav-item">
+                        <button class="icon-btn theme-toggle" type="button" aria-label="Toggle dark mode">
+                            <i class="bi bi-moon-stars"></i>
+                        </button>
+                    </li>
                     {% if user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:dashboard' %}"><i class="bi bi-person"></i> My Account</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a></li>
@@ -44,7 +56,7 @@
                     <li class="nav-item">
                         <a class="nav-link position-relative" href="{% url 'orders:cart_detail' %}">
                             <i class="bi bi-bag"></i> Bag
-                            {% if cart_item_count %}<span class="cart-badge">{{ cart_item_count }}</span>{% endif %}
+                            <span class="cart-badge" {% if not cart_item_count %}style="display:none;"{% endif %}>{{ cart_item_count|default:0 }}</span>
                         </a>
                     </li>
                 </ul>
@@ -54,12 +66,9 @@
 </header>
 
 {% if messages %}
-<div class="container mt-3">
+<div class="scm-django-messages d-none">
     {% for message in messages %}
-    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <span data-message="{{ message }}" data-tag="{{ message.tags|default:'info' }}"></span>
     {% endfor %}
 </div>
 {% endif %}
@@ -68,10 +77,26 @@
     {% block content %}{% endblock %}
 </main>
 
+<button class="back-to-top" type="button" aria-label="Back to top"><i class="bi bi-arrow-up"></i></button>
+
+<nav class="mobile-bottom-nav">
+    <ul>
+        <li><a href="{% url 'pages:home' %}"{% if request.resolver_match.url_name == 'home' %} class="active"{% endif %}><i class="bi bi-house"></i>Home</a></li>
+        <li><a href="{% url 'catalog:shop' %}"{% if request.resolver_match.app_name == 'catalog' %} class="active"{% endif %}><i class="bi bi-grid"></i>Shop</a></li>
+        <li><a href="{% url 'catalog:shop' %}?favorites=1"><i class="bi bi-heart"></i>Saved<span class="mb-badge wishlist-count" style="display:none;">0</span></a></li>
+        <li><a href="{% url 'orders:cart_detail' %}"{% if request.resolver_match.url_name == 'cart_detail' %} class="active"{% endif %}><i class="bi bi-bag"></i>Bag<span class="mb-badge cart-badge" {% if not cart_item_count %}style="display:none;"{% endif %}>{{ cart_item_count|default:0 }}</span></a></li>
+        {% if user.is_authenticated %}
+        <li><a href="{% url 'accounts:dashboard' %}"{% if request.resolver_match.url_name == 'dashboard' %} class="active"{% endif %}><i class="bi bi-person"></i>Account</a></li>
+        {% else %}
+        <li><a href="{% url 'accounts:login' %}"{% if request.resolver_match.url_name == 'login' %} class="active"{% endif %}><i class="bi bi-person"></i>Login</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
 <footer class="site-footer">
     <div class="container">
         <div class="row gy-4">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <h5 class="footer-brand">{{ site_settings.site_name }}</h5>
                 <p>{{ site_settings.tagline }}</p>
                 {% if site_settings.instagram_handle %}
@@ -80,7 +105,7 @@
                 </a>
                 {% endif %}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <h6>Delivery</h6>
                 <ul class="list-unstyled small">
                     <li>Lagos: {{ site_settings.lagos_delivery_note }}</li>
@@ -88,7 +113,7 @@
                     <li>International: {{ site_settings.international_delivery_note }}</li>
                 </ul>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <h6>Get in touch</h6>
                 <ul class="list-unstyled small">
                     {% if site_settings.contact_phone %}<li><i class="bi bi-telephone"></i> {{ site_settings.contact_phone }}</li>{% endif %}
@@ -98,6 +123,15 @@
                     {% endif %}
                 </ul>
             </div>
+            <div class="col-md-3">
+                <h6>Stay in the loop</h6>
+                <p class="small mb-2">New arrivals &amp; offers, straight to your inbox.</p>
+                <form class="newsletter-form" action="{% url 'pages:newsletter_subscribe' %}" method="post">
+                    {% csrf_token %}
+                    <input type="email" name="email" placeholder="you@email.com" required>
+                    <button type="submit"><i class="bi bi-send"></i></button>
+                </form>
+            </div>
         </div>
         <hr>
         <p class="text-center small mb-0">&copy; {% now "Y" %} {{ site_settings.site_name }}. All rights reserved.</p>
@@ -105,6 +139,7 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/main.js' %}" defer></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

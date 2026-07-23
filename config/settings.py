@@ -30,6 +30,9 @@ CSRF_TRUSTED_ORIGINS = [
 # Applications
 # ---------------------------------------------------------------------------
 INSTALLED_APPS = [
+    # must be listed before django.contrib.admin to override its templates
+    "jazzmin",
+
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -156,3 +159,93 @@ if not DEBUG:
     X_FRAME_OPTIONS = "DENY"
 
 MAX_UPLOAD_SIZE_MB = 5  # for payment proof screenshots
+
+# ---------------------------------------------------------------------------
+# Admin theme (django-jazzmin) — mirrors the storefront's black/blush/gold identity
+# ---------------------------------------------------------------------------
+JAZZMIN_SETTINGS = {
+    "site_title": "Swagcitybymercy Admin",
+    "site_header": "Swagcitybymercy",
+    "site_brand": "Swagcitybymercy",
+    "site_logo": None,
+    "login_logo": None,
+    "site_icon": None,
+    "welcome_sign": "Welcome back — here's what's happening in your store.",
+    "copyright": "Swagcitybymercy",
+    "search_model": ["catalog.Product", "orders.Order"],
+    "user_avatar": None,
+
+    "topmenu_links": [
+        {"name": "Dashboard", "url": "admin_dashboard:index", "permissions": ["auth.view_user"]},
+        {"name": "View Store", "url": "pages:home", "new_window": True},
+        {"model": "auth.User"},
+    ],
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": [
+        "orders", "orders.Order", "catalog", "catalog.Product", "catalog.Category",
+        "pages", "accounts",
+    ],
+
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "catalog.Category": "fas fa-tags",
+        "catalog.Size": "fas fa-ruler",
+        "catalog.Product": "fas fa-tshirt",
+        "catalog.ProductVariant": "fas fa-boxes-stacked",
+        "orders.Order": "fas fa-receipt",
+        "orders.ShippingZone": "fas fa-truck",
+        "orders.BankAccount": "fas fa-building-columns",
+        "accounts.CustomerProfile": "fas fa-address-card",
+        "pages.SiteSettings": "fas fa-sliders-h",
+        "pages.ContactMessage": "fas fa-envelope-open-text",
+        "pages.NewsletterSubscriber": "fas fa-paper-plane",
+    },
+    "default_icon_parents": "fas fa-folder",
+    "default_icon_children": "fas fa-circle",
+
+    "related_modal_active": True,
+    "custom_css": "css/admin_custom.css",
+    "custom_js": None,
+    "show_ui_builder": False,
+
+    "changeform_format": "horizontal_tabs",
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark",
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "flatly",
+    "dark_mode_theme": "darkly",
+    "button_classes": {
+        "primary": "btn-outline-primary",
+        "secondary": "btn-outline-secondary",
+        "info": "btn-outline-info",
+        "warning": "btn-outline-warning",
+        "danger": "btn-outline-danger",
+        "success": "btn-outline-success",
+    },
+    "actions_sticky_top": True,
+}

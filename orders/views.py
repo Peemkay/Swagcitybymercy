@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -10,6 +11,10 @@ from catalog.models import ProductVariant
 from .cart import Cart
 from .forms import CheckoutForm, PaymentProofForm
 from .models import BankAccount, Order, OrderItem
+
+
+def _is_ajax(request):
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
 
 
 def cart_detail(request):
@@ -23,7 +28,10 @@ def cart_add(request, variant_id):
     variant = get_object_or_404(ProductVariant, id=variant_id)
 
     if variant.is_out_of_stock:
-        messages.error(request, f"Sorry, {variant.product.name} ({variant.size.label}) is out of stock.")
+        error = f"Sorry, {variant.product.name} ({variant.size.label}) is out of stock."
+        if _is_ajax(request):
+            return JsonResponse({"success": False, "message": error}, status=400)
+        messages.error(request, error)
         return redirect(variant.product.get_absolute_url())
 
     try:
@@ -33,7 +41,17 @@ def cart_add(request, variant_id):
     quantity = max(1, quantity)
 
     cart.add(variant=variant, quantity=quantity)
-    messages.success(request, f"Added {variant.product.name} ({variant.size.label}) to your bag.")
+    success_message = f"Added {variant.product.name} ({variant.size.label}) to your bag."
+
+    if _is_ajax(request):
+        return JsonResponse({
+            "success": True,
+            "message": success_message,
+            "cart_count": len(cart),
+            "cart_subtotal": str(cart.subtotal),
+        })
+
+    messages.success(request, success_message)
     return redirect("orders:cart_detail")
 
 
@@ -47,8 +65,19 @@ def cart_update(request, variant_id):
         quantity = 1
     if quantity <= 0:
         cart.remove(variant_id)
+        line_total = "0"
     else:
         cart.add(variant=variant, quantity=quantity, replace=True)
+        line_total = str(variant.effective_price * quantity)
+
+    if _is_ajax(request):
+        return JsonResponse({
+            "success": True,
+            "cart_count": len(cart),
+            "cart_subtotal": str(cart.subtotal),
+            "line_total": line_total,
+            "removed": quantity <= 0,
+        })
     return redirect("orders:cart_detail")
 
 
@@ -56,6 +85,14 @@ def cart_update(request, variant_id):
 def cart_remove(request, variant_id):
     cart = Cart(request)
     cart.remove(variant_id)
+
+    if _is_ajax(request):
+        return JsonResponse({
+            "success": True,
+            "cart_count": len(cart),
+            "cart_subtotal": str(cart.subtotal),
+        })
+
     messages.info(request, "Item removed from your bag.")
     return redirect("orders:cart_detail")
 

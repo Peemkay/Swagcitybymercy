@@ -3,12 +3,12 @@
 {% block title %}Checkout{% endblock %}
 {% block content %}
 <section class="container py-5">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>Checkout</h2>
         <p>Fill in your delivery details &mdash; you'll pay by bank transfer on the next screen.</p>
     </div>
     <div class="row">
-        <div class="col-lg-7">
+        <div class="col-lg-7 reveal">
             <form method="post" novalidate>
                 {% csrf_token %}
                 <div class="row g-3">
@@ -25,10 +25,10 @@
                 {% if form.non_field_errors %}
                     <div class="alert alert-danger mt-3">{{ form.non_field_errors }}</div>
                 {% endif %}
-                <button type="submit" class="btn btn-scm w-100 mt-4">Place Order</button>
+                <button type="submit" class="btn btn-scm w-100 mt-4"><i class="bi bi-bag-check"></i> Place Order</button>
             </form>
         </div>
-        <div class="col-lg-5">
+        <div class="col-lg-5 reveal">
             <div class="summary-box">
                 <h5 class="mb-3">Order Summary</h5>
                 {% for entry in cart %}

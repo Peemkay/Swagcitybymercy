@@ -2,11 +2,11 @@
 {% block title %}Create an Account{% endblock %}
 {% block content %}
 <section class="container py-5" style="max-width:480px;">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>Create an Account</h2>
         <p>Track your orders and check out faster.</p>
     </div>
-    <form method="post" novalidate>
+    <form method="post" novalidate class="reveal">
         {% csrf_token %}
         <div class="row g-3">
             <div class="col-md-6">

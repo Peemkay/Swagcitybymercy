@@ -2,11 +2,11 @@
 {% block title %}Contact Us{% endblock %}
 {% block content %}
 <section class="container py-5" style="max-width:640px;">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>Get In Touch</h2>
         <p>Questions about an order or a style? Send us a message.</p>
     </div>
-    <form method="post" novalidate>
+    <form method="post" novalidate class="reveal">
         {% csrf_token %}
         <div class="mb-3">{{ form.name }}</div>
         <div class="mb-3">{{ form.email }}</div>

@@ -3,12 +3,12 @@
 {% block title %}Track Your Order{% endblock %}
 {% block content %}
 <section class="container py-5" style="max-width:640px;">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>Track Your Order</h2>
         <p>Enter your order number and the email you used at checkout.</p>
     </div>
 
-    <form method="post" class="row g-3 justify-content-center mb-5">
+    <form method="post" class="row g-3 justify-content-center mb-5 reveal">
         {% csrf_token %}
         <div class="col-12">
             <input type="text" name="order_number" class="form-control" placeholder="Order number (e.g. SCM-A1B2C3D4)" required>
@@ -22,7 +22,7 @@
     </form>
 
     {% if order %}
-    <div class="summary-box">
+    <div class="summary-box reveal">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">{{ order.order_number }}</h5>
             <span class="status-pill">{{ order.get_status_display }}</span>

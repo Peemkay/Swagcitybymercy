@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ContactMessage, SiteSettings
+from .models import ContactMessage, NewsletterSubscriber, SiteSettings
 
 
 @admin.register(SiteSettings)
@@ -27,3 +27,12 @@ class ContactMessageAdmin(admin.ModelAdmin):
     list_editable = ("is_read",)
     search_fields = ("name", "email", "message")
     readonly_fields = ("name", "email", "message", "created_at")
+
+
+@admin.register(NewsletterSubscriber)
+class NewsletterSubscriberAdmin(admin.ModelAdmin):
+    list_display = ("email", "subscribed_at", "is_active")
+    list_filter = ("is_active",)
+    list_editable = ("is_active",)
+    search_fields = ("email",)
+    readonly_fields = ("subscribed_at",)

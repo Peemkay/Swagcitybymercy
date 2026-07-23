@@ -2,11 +2,16 @@
 {% load humanize %}
 {% block title %}{{ product.name }}{% endblock %}
 
+{% block body_attrs %}data-product-slug="{{ product.slug }}"{% endblock %}
+
 {% block content %}
 <section class="container py-5">
     <div class="row g-5">
-        <div class="col-md-6">
+        <div class="col-md-6 reveal">
             <div class="product-gallery">
+                <button class="wishlist-btn" data-slug="{{ product.slug }}" aria-label="Save to favorites" type="button">
+                    <i class="bi bi-heart-fill"></i>
+                </button>
                 {% with img=product.primary_image %}
                     {% if img %}
                         <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}" id="mainImage">
@@ -14,18 +19,19 @@
                         <div class="d-flex align-items-center justify-content-center bg-light" style="aspect-ratio:3/4;">No image yet</div>
                     {% endif %}
                 {% endwith %}
+                <span class="gallery-zoom-hint"><i class="bi bi-zoom-in"></i> Click to zoom</span>
                 {% if product.images.count > 1 %}
                 <div class="row g-2 mt-2">
                     {% for image in product.images.all %}
                     <div class="col-3">
-                        <img src="{{ image.image.url }}" class="img-thumbnail thumb-swap" data-full="{{ image.image.url }}" style="cursor:pointer;">
+                        <img src="{{ image.image.url }}" class="img-thumbnail thumb-swap{% if forloop.first %} active-thumb{% endif %}" data-full="{{ image.image.url }}" style="cursor:pointer;">
                     </div>
                     {% endfor %}
                 </div>
                 {% endif %}
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 reveal">
             <div class="cat">{{ product.category.name }}</div>
             <h1>{{ product.name }}</h1>
             <div class="fs-4 mb-3" id="priceDisplay" style="color:var(--scm-blush-dark);">
@@ -33,9 +39,12 @@
             </div>
             <p>{{ product.description }}</p>
 
-            <form method="post" action="" id="addToCartForm">
+            <form method="post" action="" id="addToCartForm" class="ajax-cart-form">
                 {% csrf_token %}
-                <label class="d-block mb-2 text-uppercase small">Select Size</label>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <label class="d-block text-uppercase small mb-0">Select Size</label>
+                    <span class="size-guide-link" data-bs-toggle="modal" data-bs-target="#sizeGuideModal"><i class="bi bi-rulers"></i> Size guide</span>
+                </div>
                 <div class="mb-3">
                     {% for variant in product.variants.all %}
                     <label class="size-option {% if variant.is_out_of_stock %}disabled{% endif %}"
@@ -50,24 +59,29 @@
                     {% endfor %}
                 </div>
 
-                <div class="mb-3" style="max-width:140px;">
+                <div class="mb-3">
                     <label class="text-uppercase small d-block mb-1">Quantity</label>
-                    <input type="number" name="quantity" id="quantityInput" value="1" min="1" class="form-control">
+                    <div class="qty-stepper">
+                        <button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button>
+                        <input type="number" name="quantity" id="quantityInput" value="1" min="1" class="form-control">
+                        <button type="button" data-step="1" aria-label="Increase quantity">&plus;</button>
+                    </div>
                 </div>
 
                 <p class="small text-muted" id="stockNote"></p>
-                <button type="submit" class="btn btn-scm w-100" id="addToCartBtn" disabled>Add to Bag</button>
+                <button type="submit" class="btn btn-scm w-100" id="addToCartBtn" disabled><i class="bi bi-bag-plus"></i> Add to Bag</button>
             </form>
 
             <div class="mt-4 small text-muted">
                 <p><i class="bi bi-truck"></i> {{ site_settings.lagos_delivery_note }} within Lagos</p>
                 <p><i class="bi bi-bank"></i> Pay securely by bank transfer at checkout</p>
+                <p><i class="bi bi-arrow-repeat"></i> Careful quality check before every dispatch</p>
             </div>
         </div>
     </div>
 
     {% if related_products %}
-    <div class="section-title mt-5">
+    <div class="section-title mt-5 reveal">
         <h2>You May Also Like</h2>
     </div>
     <div class="row g-4">
@@ -77,6 +91,49 @@
     </div>
     {% endif %}
 </section>
+
+<div class="sticky-add-bar" id="stickyAddBar">
+    {% with img=product.primary_image %}{% if img %}<img src="{{ img.image.url }}" alt="">{% endif %}{% endwith %}
+    <div class="info">
+        <div class="n">{{ product.name }}</div>
+        <div class="p">&#8358;{{ product.base_price|floatformat:0|intcomma }}</div>
+    </div>
+    <button type="button" class="btn btn-scm btn-scm-sm">Select Size</button>
+</div>
+
+<div class="modal fade" id="sizeGuideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;">
+            <div class="modal-header">
+                <h5 class="modal-title">Size Guide</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table size-guide-table">
+                    <thead><tr><th>Size</th><th>Bust (in)</th><th>Waist (in)</th><th>Hips (in)</th></tr></thead>
+                    <tbody>
+                        <tr><td>XS</td><td>32&ndash;33</td><td>25&ndash;26</td><td>35&ndash;36</td></tr>
+                        <tr><td>S</td><td>34&ndash;35</td><td>27&ndash;28</td><td>37&ndash;38</td></tr>
+                        <tr><td>M</td><td>36&ndash;37</td><td>29&ndash;30</td><td>39&ndash;40</td></tr>
+                        <tr><td>L</td><td>38&ndash;40</td><td>31&ndash;33</td><td>41&ndash;43</td></tr>
+                        <tr><td>XL</td><td>41&ndash;43</td><td>34&ndash;36</td><td>44&ndash;46</td></tr>
+                    </tbody>
+                </table>
+                <p class="small text-muted mb-0">Measurements are a general guide &mdash; message us on WhatsApp if you're between sizes.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="application/json" id="currentProductData">
+{
+    "slug": "{{ product.slug|escapejs }}",
+    "name": "{{ product.name|escapejs }}",
+    "url": "{{ product.get_absolute_url|escapejs }}",
+    "price": "{{ product.base_price }}",
+    "image": "{% with img=product.primary_image %}{% if img %}{{ img.image.url|escapejs }}{% endif %}{% endwith %}"
+}
+</script>
 {% endblock %}
 
 {% block extra_js %}
@@ -95,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const label = checked.closest('.size-option');
         const price = parseFloat(label.dataset.price);
         const stock = parseInt(label.dataset.stock, 10);
-        priceDisplay.textContent = '\u20a6' + price.toLocaleString();
+        priceDisplay.textContent = '₦' + price.toLocaleString();
         qtyInput.max = stock;
         if (parseInt(qtyInput.value, 10) > stock) qtyInput.value = stock;
         stockNote.textContent = stock <= 3 ? `Only ${stock} left in this size` : '';
@@ -105,12 +162,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     sizeOptions.forEach(function (input) {
         input.addEventListener('change', updateFromSelection);
-    });
-
-    document.querySelectorAll('.thumb-swap').forEach(function (thumb) {
-        thumb.addEventListener('click', function () {
-            document.getElementById('mainImage').src = thumb.dataset.full;
-        });
     });
 });
 </script>

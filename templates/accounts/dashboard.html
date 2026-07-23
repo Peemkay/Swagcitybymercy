@@ -3,13 +3,13 @@
 {% block title %}My Account{% endblock %}
 {% block content %}
 <section class="container py-5">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>My Orders</h2>
         <p>Welcome back, {{ user.first_name|default:user.username }}.</p>
     </div>
 
     {% if orders %}
-    <div class="table-responsive">
+    <div class="table-responsive reveal">
         <table class="table align-middle">
             <thead>
                 <tr>

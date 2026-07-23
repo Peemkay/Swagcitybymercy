@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block content %}
+<section class="container error-page">
+    <div>
+        <div class="code reveal">404</div>
+        <h2 class="reveal mt-2">This page has wandered off</h2>
+        <p class="text-muted reveal">The page you're looking for doesn't exist or may have moved.</p>
+        <a href="{% url 'pages:home' %}" class="btn btn-scm mt-3 reveal">Back to Home</a>
+        <a href="{% url 'catalog:shop' %}" class="btn btn-scm-outline mt-3 ms-2 reveal">Continue Shopping</a>
+    </div>
+</section>
+{% endblock %}

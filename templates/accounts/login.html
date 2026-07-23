@@ -2,10 +2,10 @@
 {% block title %}Login{% endblock %}
 {% block content %}
 <section class="container py-5" style="max-width:420px;">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>Login</h2>
     </div>
-    <form method="post" novalidate>
+    <form method="post" novalidate class="reveal">
         {% csrf_token %}
         <div class="mb-3">
             <label class="form-label small text-uppercase">Username</label>

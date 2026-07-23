@@ -144,6 +144,34 @@ python manage.py collectstatic --noinput
 ```
 Then hit **Reload** on the Web tab.
 
+This sequence is safe to run any time, including while the site has live
+traffic: `git pull`, `pip install`, `migrate`, and `collectstatic` only touch
+files and the database — the currently running app keeps serving requests
+with the *old* code the entire time. Nothing changes for visitors until you
+click **Reload**, which restarts the app in a few seconds. There's no way to
+make that restart itself literally zero-downtime on a single-worker
+PythonAnywhere app, so for the smoothest experience click Reload during a
+quiet period (e.g. late night Lagos time) rather than mid-traffic — but a
+failed mid-request during that brief restart window is the only realistic
+risk, not extended downtime.
+
+### Notes for the 2026-07 UI overhaul release
+
+This update adds a new dependency (`django-jazzmin`, for the redesigned admin
+theme) and one new migration (`pages.0002_newslettersubscriber`, adds a
+newsletter-signup table — additive only, no risk to existing data). Both are
+already covered by the standard steps above, but don't skip
+`pip install -r requirements.txt` or `migrate` for this one like you might
+for a pure template/CSS tweak.
+
+After reloading:
+- Visit **`/admin/`** — you should see the new dark-sidebar Jazzmin theme.
+- Visit **`/admin/dashboard/`** for the new store-stats dashboard (today's
+  orders, pending payments, low stock, revenue this month).
+- The storefront now has a dark-mode toggle, AJAX add-to-cart, wishlist
+  (local to each visitor's browser), and a footer newsletter signup — no
+  admin configuration needed for any of it.
+
 ---
 
 ## Troubleshooting

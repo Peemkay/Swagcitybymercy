@@ -1,9 +1,12 @@
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST
 
 from catalog.models import Category, Product
 
-from .forms import ContactForm
+from .forms import ContactForm, NewsletterForm
+from .models import NewsletterSubscriber
 
 
 def home(request):
@@ -36,3 +39,24 @@ def contact(request):
     else:
         form = ContactForm()
     return render(request, "pages/contact.html", {"form": form})
+
+
+@require_POST
+def newsletter_subscribe(request):
+    form = NewsletterForm(request.POST)
+    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+    if form.is_valid():
+        email = form.cleaned_data["email"]
+        NewsletterSubscriber.objects.get_or_create(email=email, defaults={"is_active": True})
+        message = "You're subscribed! Watch your inbox for new arrivals & offers."
+        if is_ajax:
+            return JsonResponse({"success": True, "message": message})
+        messages.success(request, message)
+    else:
+        message = "Please enter a valid email address."
+        if is_ajax:
+            return JsonResponse({"success": False, "message": message}, status=400)
+        messages.error(request, message)
+
+    return redirect(request.META.get("HTTP_REFERER", "pages:home"))

@@ -5,6 +5,9 @@
 
 {% block content %}
 <section class="hero">
+    <div class="hero-blob b1"></div>
+    <div class="hero-blob b2"></div>
+    <div class="hero-blob b3"></div>
     <div class="container">
         <div class="cat mb-2" style="letter-spacing:.15em;text-transform:uppercase;font-size:.8rem;color:var(--scm-blush-dark)">Lagos, Nigeria</div>
         <h1>Effortlessly Chic,<br>Unmistakably You</h1>
@@ -15,20 +18,20 @@
 
 {% if categories %}
 <section class="container py-5">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>Shop by Category</h2>
         <p>Find your next statement piece</p>
     </div>
-    <div class="text-center">
+    <div class="text-center reveal">
         {% for category in categories %}
-            <a href="{% url 'catalog:category_detail' category.slug %}" class="category-pill">{{ category.name }}</a>
+            <a href="{% url 'catalog:category_detail' category.slug %}" class="category-pill"><i class="bi bi-tag"></i> {{ category.name }}</a>
         {% endfor %}
     </div>
 </section>
 {% endif %}
 
 <section class="container py-5">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>New &amp; Loved</h2>
         <p>Handpicked pieces our customers can't get enough of</p>
     </div>
@@ -39,25 +42,35 @@
             <p class="text-center text-muted">New styles are on their way &mdash; check back soon.</p>
         {% endfor %}
     </div>
-    <div class="text-center mt-5">
+    <div class="text-center mt-5 reveal">
         <a href="{% url 'catalog:shop' %}" class="btn btn-scm-outline">View All Styles</a>
     </div>
 </section>
 
 <section class="container py-5">
+    <div class="recently-viewed-strip" id="recentlyViewedStrip">
+        <div class="section-title reveal">
+            <h2>Recently Viewed</h2>
+            <p>Pick up where you left off</p>
+        </div>
+        <div class="rv-track d-flex gap-3 overflow-auto pb-2"></div>
+    </div>
+</section>
+
+<section class="container py-5">
     <div class="row g-4 text-center">
-        <div class="col-md-4">
-            <i class="bi bi-truck fs-2 mb-2 d-block"></i>
+        <div class="col-md-4 trust-item reveal">
+            <div class="trust-icon"><i class="bi bi-truck"></i></div>
             <h6 class="text-uppercase small">Fast Lagos Delivery</h6>
             <p class="small text-muted">{{ site_settings.lagos_delivery_note }}</p>
         </div>
-        <div class="col-md-4">
-            <i class="bi bi-bank fs-2 mb-2 d-block"></i>
+        <div class="col-md-4 trust-item reveal">
+            <div class="trust-icon"><i class="bi bi-bank"></i></div>
             <h6 class="text-uppercase small">Secure Bank Transfer</h6>
             <p class="small text-muted">Pay directly into our Naira account &mdash; simple &amp; secure.</p>
         </div>
-        <div class="col-md-4">
-            <i class="bi bi-gem fs-2 mb-2 d-block"></i>
+        <div class="col-md-4 trust-item reveal">
+            <div class="trust-icon"><i class="bi bi-gem"></i></div>
             <h6 class="text-uppercase small">Quality Guaranteed</h6>
             <p class="small text-muted">Every piece is checked for quality before it ships.</p>
         </div>

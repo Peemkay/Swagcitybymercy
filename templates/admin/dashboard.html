@@ -1,0 +1,121 @@
+{% extends "admin/base_site.html" %}
+{% load humanize %}
+{% block bodyclass %}{{ block.super }} scm-dashboard{% endblock %}
+
+{% block content_title %}Dashboard{% endblock %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'admin:index' %}">Home</a></li>
+        <li class="breadcrumb-item">Dashboard</li>
+    </ol>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .scm-stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 24px; }
+    .scm-stat-card {
+        border-radius: 14px; padding: 20px 22px; color: #fff; position: relative; overflow: hidden;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.16); transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .scm-stat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.22); }
+    .scm-stat-card .scm-icon { position: absolute; right: 14px; top: 14px; font-size: 2.2rem; opacity: 0.28; }
+    .scm-stat-card .scm-label { font-size: 0.78rem; letter-spacing: .06em; text-transform: uppercase; opacity: 0.85; margin-bottom: 6px; }
+    .scm-stat-card .scm-value { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .scm-stat-card .scm-sub { font-size: 0.78rem; opacity: 0.8; margin-top: 6px; }
+    .scm-c1 { background: linear-gradient(135deg, #1c1a18, #3a3733); }
+    .scm-c2 { background: linear-gradient(135deg, #b97d68, #cf9a86); }
+    .scm-c3 { background: linear-gradient(135deg, #a9824c, #cf9a86); }
+    .scm-c4 { background: linear-gradient(135deg, #8e44ad, #6f42c1); }
+    .scm-c5 { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+    .scm-panel { border-radius: 14px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+    .scm-panel .card-header { border-radius: 14px 14px 0 0; font-weight: 600; }
+    .scm-status-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; letter-spacing: .04em; text-transform: uppercase; color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="scm-stat-row">
+    <div class="scm-stat-card scm-c1">
+        <i class="fas fa-calendar-day scm-icon"></i>
+        <div class="scm-label">Orders Today</div>
+        <div class="scm-value">{{ orders_today }}</div>
+        <div class="scm-sub">{{ orders_this_week }} in the last 7 days</div>
+    </div>
+    <div class="scm-stat-card scm-c2">
+        <i class="fas fa-hourglass-half scm-icon"></i>
+        <div class="scm-label">Awaiting Action</div>
+        <div class="scm-value">{{ awaiting_action }}</div>
+        <div class="scm-sub">Pending payment / proof review</div>
+    </div>
+    <div class="scm-stat-card scm-c3">
+        <i class="fas fa-sack-dollar scm-icon"></i>
+        <div class="scm-label">Revenue (this month)</div>
+        <div class="scm-value">&#8358;{{ revenue_month|floatformat:0|intcomma }}</div>
+        <div class="scm-sub">Confirmed &amp; fulfilled orders</div>
+    </div>
+    <div class="scm-stat-card scm-c5">
+        <i class="fas fa-triangle-exclamation scm-icon"></i>
+        <div class="scm-label">Stock Alerts</div>
+        <div class="scm-value">{{ low_stock_variants|length }}</div>
+        <div class="scm-sub">{{ out_of_stock_count }} variant(s) fully out</div>
+    </div>
+    <div class="scm-stat-card scm-c4">
+        <i class="fas fa-envelope-open-text scm-icon"></i>
+        <div class="scm-label">Unread Messages</div>
+        <div class="scm-value">{{ unread_messages }}</div>
+        <div class="scm-sub">From the contact form</div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7 col-12 mb-4">
+        <div class="card scm-panel">
+            <div class="card-header">Recent Orders</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr><th class="ps-3">Order</th><th>Customer</th><th>Status</th><th class="text-end pe-3">Total</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for order in recent_orders %}
+                        <tr>
+                            <td class="ps-3"><a href="{% url 'admin:orders_order_change' order.pk %}">{{ order.order_number }}</a></td>
+                            <td>{{ order.full_name }}</td>
+                            <td><span class="scm-status-badge" style="background:{% if order.status == 'delivered' %}#16a085{% elif order.status == 'cancelled' %}#c0392b{% elif order.status == 'payment_confirmed' %}#27ae60{% else %}#95a5a6{% endif %}">{{ order.get_status_display }}</span></td>
+                            <td class="text-end pe-3">&#8358;{{ order.total|floatformat:0|intcomma }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td class="p-3 text-muted" colspan="4">No orders yet.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5 col-12 mb-4">
+        <div class="card scm-panel">
+            <div class="card-header">Low Stock Watch</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr><th class="ps-3">Product</th><th>Size</th><th class="text-end pe-3">Left</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for variant in low_stock_variants %}
+                        <tr>
+                            <td class="ps-3"><a href="{% url 'admin:catalog_product_change' variant.product.pk %}">{{ variant.product.name }}</a></td>
+                            <td>{{ variant.size.label }}</td>
+                            <td class="text-end pe-3 text-danger fw-bold">{{ variant.stock_quantity }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td class="p-3 text-muted" colspan="3">Stock levels look healthy.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

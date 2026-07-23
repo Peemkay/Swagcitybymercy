@@ -3,7 +3,7 @@
 {% block title %}Your Bag{% endblock %}
 {% block content %}
 <section class="container py-5">
-    <div class="section-title">
+    <div class="section-title reveal">
         <h2>Your Bag</h2>
     </div>
 
@@ -17,24 +17,28 @@
             <div class="cart-line d-flex align-items-center">
                 <div class="me-3" style="width:80px;">
                     {% with img=entry.variant.product.primary_image %}
-                        {% if img %}<img src="{{ img.image.url }}" class="w-100" style="aspect-ratio:3/4;object-fit:cover;">{% endif %}
+                        {% if img %}<img src="{{ img.image.url }}" class="w-100" style="aspect-ratio:3/4;object-fit:cover;border-radius:8px;">{% endif %}
                     {% endwith %}
                 </div>
                 <div class="flex-grow-1">
                     <div class="fw-semibold">{{ entry.variant.product.name }}</div>
                     <div class="small text-muted">Size: {{ entry.variant.size.label }}</div>
                     <div class="small">&#8358;{{ entry.unit_price|floatformat:0|intcomma }} each</div>
-                    <form method="post" action="{% url 'orders:cart_update' entry.variant.id %}" class="d-flex align-items-center gap-2 mt-2">
+                    <form method="post" action="{% url 'orders:cart_update' entry.variant.id %}" class="cart-update-form d-flex align-items-center gap-2 mt-2">
                         {% csrf_token %}
-                        <input type="number" name="quantity" value="{{ entry.quantity }}" min="1" max="{{ entry.variant.stock_quantity }}" class="form-control form-control-sm" style="width:70px;">
+                        <div class="qty-stepper">
+                            <button type="button" data-step="-1" aria-label="Decrease quantity">&minus;</button>
+                            <input type="number" name="quantity" value="{{ entry.quantity }}" min="1" max="{{ entry.variant.stock_quantity }}" class="form-control form-control-sm">
+                            <button type="button" data-step="1" aria-label="Increase quantity">&plus;</button>
+                        </div>
                         <button class="btn btn-sm btn-scm-outline" type="submit">Update</button>
                     </form>
                 </div>
                 <div class="text-end">
-                    <div class="fw-semibold mb-2">&#8358;{{ entry.line_total|floatformat:0|intcomma }}</div>
-                    <form method="post" action="{% url 'orders:cart_remove' entry.variant.id %}">
+                    <div class="fw-semibold mb-2 js-line-total">&#8358;{{ entry.line_total|floatformat:0|intcomma }}</div>
+                    <form method="post" action="{% url 'orders:cart_remove' entry.variant.id %}" class="cart-remove-form">
                         {% csrf_token %}
-                        <button class="btn btn-sm btn-link text-danger p-0" type="submit">Remove</button>
+                        <button class="btn btn-sm btn-link text-danger p-0" type="submit"><i class="bi bi-trash3"></i> Remove</button>
                     </form>
                 </div>
             </div>
@@ -45,10 +49,11 @@
                 <h5 class="mb-3">Order Summary</h5>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Subtotal</span>
-                    <span>&#8358;{{ cart.subtotal|floatformat:0|intcomma }}</span>
+                    <span class="js-cart-subtotal">&#8358;{{ cart.subtotal|floatformat:0|intcomma }}</span>
                 </div>
                 <p class="small text-muted">Shipping fee is calculated at checkout based on your delivery region.</p>
-                <a href="{% url 'orders:checkout' %}" class="btn btn-scm w-100 mt-2">Proceed to Checkout</a>
+                <a href="{% url 'orders:checkout' %}" class="btn btn-scm w-100 mt-2"><i class="bi bi-lock"></i> Proceed to Checkout</a>
+                <a href="{% url 'catalog:shop' %}" class="btn btn-scm-outline w-100 mt-2">Continue Shopping</a>
             </div>
         </div>
     </div>
