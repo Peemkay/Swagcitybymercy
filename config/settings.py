@@ -128,7 +128,13 @@ MEDIA_ROOT = BASE_DIR / "media"
 if not DEBUG:
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+        # Not the Manifest variant: django-jazzmin's own admin/base.html contains
+        # a {% static 'vendor/bootswatch' %} reference to a bare directory (used
+        # as a JS data attribute, not a real file). ManifestStaticFilesStorage
+        # requires every {% static %} tag to resolve to an actual collected file
+        # and raises a hard 500 otherwise — harmless under the plain storage
+        # below, which just emits the (unused) URL without validating it.
+        "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
     }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
