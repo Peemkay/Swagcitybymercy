@@ -6,7 +6,7 @@ from .models import ContactMessage, NewsletterSubscriber, SiteSettings
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
-        ("Store identity", {"fields": ("site_name", "tagline", "about_text")}),
+        ("Store identity", {"fields": ("site_name", "tagline", "about_text", "logo")}),
         ("Contact & socials", {"fields": ("whatsapp_number", "instagram_handle", "contact_email", "contact_phone")}),
         ("Delivery notes (shown at checkout)", {
             "fields": ("lagos_delivery_note", "other_regions_delivery_note", "international_delivery_note"),

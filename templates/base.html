@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ site_settings.site_name }}{% endblock %} | {{ site_settings.tagline }}</title>
     <meta name="description" content="{{ site_settings.tagline }}">
+    {% if site_settings.logo %}<link rel="icon" href="{{ site_settings.logo.url }}">{% endif %}
     <script>
         (function () {
             var saved = localStorage.getItem('scm-theme');
@@ -29,7 +30,10 @@
 <header class="site-header">
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'pages:home' %}">{{ site_settings.site_name }}</a>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'pages:home' %}">
+                {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" class="brand-logo">{% endif %}
+                <span>{{ site_settings.site_name }}</span>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -97,7 +101,11 @@
     <div class="container">
         <div class="row gy-4">
             <div class="col-md-3">
+                {% if site_settings.logo %}
+                <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.site_name }}" class="footer-logo mb-2">
+                {% else %}
                 <h5 class="footer-brand">{{ site_settings.site_name }}</h5>
+                {% endif %}
                 <p>{{ site_settings.tagline }}</p>
                 {% if site_settings.instagram_handle %}
                 <a href="https://www.instagram.com/{{ site_settings.instagram_handle }}/" target="_blank" class="footer-social">

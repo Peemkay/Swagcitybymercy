@@ -145,6 +145,8 @@ a { text-decoration: none; color: inherit; }
     transition: background-position .6s var(--scm-ease);
 }
 .navbar-brand:hover { background-position: 100% 0; }
+.brand-logo { height: 40px; width: auto; object-fit: contain; }
+.footer-logo { height: 44px; width: auto; object-fit: contain; }
 
 .main-nav .nav-link {
     font-size: 0.85rem;

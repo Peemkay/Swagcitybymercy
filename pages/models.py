@@ -4,8 +4,15 @@ from django.db import models
 class SiteSettings(models.Model):
     """Singleton model — admin edits store-wide info shown across the site."""
     site_name = models.CharField(max_length=100, default="Swagcitybymercy")
-    tagline = models.CharField(max_length=255, blank=True, default="Quality, luxury female apparel — Lagos, Nigeria.")
-    about_text = models.TextField(blank=True)
+    tagline = models.CharField(
+        max_length=255, blank=True, default="Quality, luxury female apparel — Lagos, Nigeria.",
+        help_text="Short slogan/motto shown in the header area, browser tab, and search results.",
+    )
+    about_text = models.TextField(blank=True, help_text="Longer site description, shown on the About page and homepage.")
+    logo = models.ImageField(
+        upload_to="site/", blank=True, null=True,
+        help_text="Shown in the site header, footer, and browser tab icon. Square images work best.",
+    )
     whatsapp_number = models.CharField(max_length=30, blank=True, help_text="Digits only with country code, e.g. 2348012345678")
     instagram_handle = models.CharField(max_length=100, blank=True, default="swagcitybymercy")
     contact_email = models.EmailField(blank=True)
