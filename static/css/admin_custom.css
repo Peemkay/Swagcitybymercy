@@ -43,3 +43,24 @@ table.table thead th {
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #b97d68; border-radius: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* Cropped emblem icon (square, opaque background) sized for the sidebar
+   brand strip and framed in white so it reads cleanly against the dark
+   sidebar / dark mode instead of looking like a stray white square. */
+.brand-image-icon {
+    height: 32px !important;
+    width: 32px !important;
+    border-radius: 50%;
+    background: #fff;
+    padding: 2px;
+    opacity: 1 !important;
+    box-shadow: none !important;
+}
+
+.login-logo img {
+    max-height: 70px;
+    width: auto;
+    border-radius: 8px;
+    background: #fff;
+    padding: 8px 14px;
+}

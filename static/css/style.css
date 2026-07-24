@@ -145,8 +145,16 @@ a { text-decoration: none; color: inherit; }
     transition: background-position .6s var(--scm-ease);
 }
 .navbar-brand:hover { background-position: 100% 0; }
-.brand-logo { height: 40px; width: auto; object-fit: contain; }
-.footer-logo { height: 44px; width: auto; object-fit: contain; }
+/* Logo images ship as opaque JPEGs, so frame them in a light card rather
+   than letting the white background clash with dark surfaces / dark mode. */
+.brand-logo, .footer-logo {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(var(--scm-shadow-rgb), .12);
+    object-fit: contain;
+}
+.brand-logo { height: 42px; width: 42px; padding: 4px; border-radius: 50%; }
+.footer-logo { height: 52px; width: auto; padding: 6px 12px; }
 
 .main-nav .nav-link {
     font-size: 0.85rem;
