@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,7 +11,7 @@ from catalog.models import ProductVariant
 
 from .cart import Cart
 from .forms import CheckoutForm, PaymentProofForm
-from .models import BankAccount, Order, OrderItem
+from .models import BankAccount, Order, OrderEvent, OrderItem
 
 
 def _is_ajax(request):
@@ -140,6 +141,7 @@ def checkout(request):
                     variant.save(update_fields=["stock_quantity"])
 
                 order.recalculate_totals()
+                order.log_event("Order placed.", event_type=OrderEvent.EventType.CREATED)
                 cart.clear()
 
             return redirect("orders:order_success", order_number=order.order_number)
@@ -172,10 +174,64 @@ def upload_payment_proof(request, order_number):
         proof.save()
         order.status = Order.Status.PROOF_SUBMITTED
         order.save(update_fields=["status"])
+        order.log_event("Payment proof uploaded by customer.", event_type=OrderEvent.EventType.PROOF_UPLOADED)
         messages.success(request, "Thanks! We've received your payment proof and will confirm your order shortly.")
     else:
         messages.error(request, "There was a problem with your upload — please try again.")
     return redirect("orders:order_success", order_number=order.order_number)
+
+
+@login_required
+def order_detail(request, order_number):
+    order = get_object_or_404(
+        Order.objects.select_related("shipping_zone", "bank_account").prefetch_related(
+            "items", "events", "refunds",
+        ),
+        order_number=order_number, customer=request.user,
+    )
+    proof_form = None if hasattr(order, "payment_proof") else PaymentProofForm()
+    return render(request, "orders/order_detail.html", {
+        "order": order,
+        "timeline": order.events.filter(visible_to_customer=True),
+        "refunds": order.refunds.all(),
+        "proof_form": proof_form,
+        "can_cancel": order.status in Order.CUSTOMER_CANCELLABLE_STATUSES,
+    })
+
+
+@login_required
+@require_POST
+def order_cancel(request, order_number):
+    order = get_object_or_404(Order, order_number=order_number, customer=request.user)
+    if order.status not in Order.CUSTOMER_CANCELLABLE_STATUSES:
+        messages.error(request, "This order can no longer be cancelled — it's already being processed. Contact us if you need help.")
+    else:
+        order.cancel(actor=request.user)
+        messages.success(request, f"Order {order.order_number} has been cancelled.")
+    return redirect("orders:order_detail", order_number=order.order_number)
+
+
+@login_required
+@require_POST
+def order_reorder(request, order_number):
+    order = get_object_or_404(Order.objects.prefetch_related("items__product_variant"), order_number=order_number, customer=request.user)
+    cart = Cart(request)
+    added, unavailable = 0, []
+    for item in order.items.all():
+        variant = item.product_variant
+        if variant.is_out_of_stock:
+            unavailable.append(f"{item.product_name} ({item.size_label})")
+            continue
+        cart.add(variant=variant, quantity=min(item.quantity, variant.stock_quantity))
+        added += 1
+
+    if added:
+        messages.success(request, f"Added {added} item(s) from this order back to your bag.")
+    if unavailable:
+        messages.warning(request, "Out of stock and skipped: " + ", ".join(unavailable))
+    if not added and not unavailable:
+        messages.info(request, "This order has no items to reorder.")
+    return redirect("orders:cart_detail")
 
 
 def track_order(request):

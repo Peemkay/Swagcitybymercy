@@ -54,6 +54,42 @@ class ContactMessage(models.Model):
         return f"{self.name} - {self.created_at:%Y-%m-%d}"
 
 
+class PolicyPage(models.Model):
+    class Kind(models.TextChoices):
+        RETURNS = "returns", "Return & Refund Policy"
+        PRIVACY = "privacy", "Privacy Policy"
+        TERMS = "terms", "Terms & Conditions"
+
+    kind = models.CharField(max_length=20, choices=Kind.choices, unique=True)
+    title = models.CharField(max_length=150)
+    content = models.TextField(help_text="Supports basic HTML (paragraphs, lists, bold, links).")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["kind"]
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("pages:policy", args=[self.kind])
+
+
+class FAQItem(models.Model):
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+    order = models.PositiveIntegerField(default=0, help_text="Lower numbers appear first.")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "FAQ item"
+
+    def __str__(self):
+        return self.question
+
+
 class NewsletterSubscriber(models.Model):
     email = models.EmailField(unique=True)
     subscribed_at = models.DateTimeField(auto_now_add=True)

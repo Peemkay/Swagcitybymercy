@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ policy.title }}{% endblock %}
+{% block content %}
+<section class="container py-5" style="max-width:760px;">
+    <div class="section-title reveal">
+        <h2>{{ policy.title }}</h2>
+        <p class="small text-muted">Last updated {{ policy.updated_at|date:"jS M, Y" }}</p>
+    </div>
+    <div class="policy-content reveal">
+        {{ policy.content|safe }}
+    </div>
+</section>
+{% endblock %}

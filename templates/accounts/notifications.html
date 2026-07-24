@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<section class="container py-5" style="max-width:640px;">
+    <p class="small mb-3"><a href="{% url 'accounts:dashboard' %}">&larr; Back to My Account</a></p>
+    <div class="section-title reveal">
+        <h2>Notifications</h2>
+    </div>
+
+    {% if notifications %}
+    <div class="reveal">
+        {% for note in notifications %}
+        <a href="{% if note.link %}{{ note.link }}{% else %}#{% endif %}" class="text-decoration-none">
+            <div class="cart-line d-flex justify-content-between align-items-center">
+                <span class="{{ note.is_read|yesno:'text-muted,' }}">{{ note.message }}</span>
+                <span class="small text-muted text-nowrap ms-3">{{ note.created_at|naturaltime }}</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+        <p class="text-center text-muted">You don't have any notifications yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

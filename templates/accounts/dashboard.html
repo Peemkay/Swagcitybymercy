@@ -21,15 +21,17 @@
                     <th>Date</th>
                     <th>Status</th>
                     <th class="text-end">Total</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 {% for order in orders %}
                 <tr>
-                    <td>{{ order.order_number }}</td>
+                    <td><a href="{% url 'orders:order_detail' order.order_number %}">{{ order.order_number }}</a></td>
                     <td>{{ order.created_at|date:"jS M, Y" }}</td>
                     <td><span class="status-pill">{{ order.get_status_display }}</span></td>
                     <td class="text-end">&#8358;{{ order.total|floatformat:0|intcomma }}</td>
+                    <td class="text-end"><a href="{% url 'orders:order_detail' order.order_number %}" class="btn btn-scm-sm btn-scm-outline">View</a></td>
                 </tr>
                 {% endfor %}
             </tbody>

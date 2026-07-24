@@ -13,4 +13,7 @@ urlpatterns = [
     path("success/<str:order_number>/", views.order_success, name="order_success"),
     path("success/<str:order_number>/upload-proof/", views.upload_payment_proof, name="upload_payment_proof"),
     path("track/", views.track_order, name="track_order"),
+    path("order/<str:order_number>/", views.order_detail, name="order_detail"),
+    path("order/<str:order_number>/cancel/", views.order_cancel, name="order_cancel"),
+    path("order/<str:order_number>/reorder/", views.order_reorder, name="order_reorder"),
 ]

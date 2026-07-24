@@ -52,6 +52,12 @@
                         </button>
                     </li>
                     {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'accounts:notifications' %}" aria-label="Notifications">
+                                <i class="bi bi-bell"></i>
+                                {% if unread_notification_count %}<span class="cart-badge">{{ unread_notification_count }}</span>{% endif %}
+                            </a>
+                        </li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'accounts:dashboard' %}"><i class="bi bi-person"></i> My Account</a></li>
                         <li class="nav-item">
                             <form method="post" action="{% url 'accounts:logout' %}" class="m-0">
@@ -143,6 +149,12 @@
             </div>
         </div>
         <hr>
+        <div class="d-flex flex-wrap justify-content-center gap-3 small mb-3 footer-policy-links">
+            <a href="{% url 'pages:returns_policy' %}">Return &amp; Refund Policy</a>
+            <a href="{% url 'pages:privacy_policy' %}">Privacy Policy</a>
+            <a href="{% url 'pages:terms_conditions' %}">Terms &amp; Conditions</a>
+            <a href="{% url 'pages:faq' %}">FAQ</a>
+        </div>
         <p class="text-center small mb-0">&copy; {% now "Y" %} {{ site_settings.site_name }}. All rights reserved.</p>
     </div>
 </footer>

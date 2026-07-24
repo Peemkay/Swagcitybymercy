@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from catalog.models import ProductVariant
-from orders.models import Order
+from orders.models import Order, OrderEvent, Refund
 
 from .models import ContactMessage
 
@@ -45,6 +45,8 @@ def dashboard(request):
     unread_messages = ContactMessage.objects.filter(is_read=False).count()
 
     recent_orders = Order.objects.select_related("shipping_zone").order_by("-created_at")[:8]
+    recent_activity = OrderEvent.objects.select_related("order", "actor").order_by("-created_at")[:8]
+    pending_refunds = Refund.objects.select_related("order").filter(status=Refund.Status.PENDING).count()
 
     context = admin.site.each_context(request)
     context.update({
@@ -57,5 +59,7 @@ def dashboard(request):
         "out_of_stock_count": out_of_stock_count,
         "unread_messages": unread_messages,
         "recent_orders": recent_orders,
+        "recent_activity": recent_activity,
+        "pending_refunds": pending_refunds,
     })
     return render(request, "admin/dashboard.html", context)

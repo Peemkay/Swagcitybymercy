@@ -12,4 +12,6 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
     path("password/change/", views.CustomerPasswordChangeView.as_view(), name="password_change"),
     path("password/change/done/", views.CustomerPasswordChangeDoneView.as_view(), name="password_change_done"),
+    path("notifications/", views.notifications, name="notifications"),
+    path("notifications/<int:pk>/read/", views.notification_read, name="notification_read"),
 ]

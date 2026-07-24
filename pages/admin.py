@@ -1,6 +1,7 @@
 from django.contrib import admin
+from django.contrib.admin.models import LogEntry
 
-from .models import ContactMessage, NewsletterSubscriber, SiteSettings
+from .models import ContactMessage, FAQItem, NewsletterSubscriber, PolicyPage, SiteSettings
 
 
 @admin.register(SiteSettings)
@@ -36,3 +37,46 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
     list_editable = ("is_active",)
     search_fields = ("email",)
     readonly_fields = ("subscribed_at",)
+
+
+@admin.register(PolicyPage)
+class PolicyPageAdmin(admin.ModelAdmin):
+    list_display = ("title", "kind", "updated_at")
+    readonly_fields = ("updated_at",)
+
+    def has_add_permission(self, request):
+        # Fixed set of kinds seeded by migration — edit them, don't add more.
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(FAQItem)
+class FAQItemAdmin(admin.ModelAdmin):
+    list_display = ("question", "order", "is_active")
+    list_editable = ("order", "is_active")
+    search_fields = ("question", "answer")
+
+
+@admin.register(LogEntry)
+class LogEntryAdmin(admin.ModelAdmin):
+    """Read-only view over Django's own admin action audit trail — every
+    add/change/delete made anywhere in the admin, by whom and when."""
+    list_display = ("action_time", "user", "content_type", "object_repr", "action_flag_display", "change_message")
+    list_filter = ("action_flag", "content_type", "user")
+    search_fields = ("object_repr", "change_message")
+    date_hierarchy = "action_time"
+
+    def action_flag_display(self, obj):
+        return {1: "Added", 2: "Changed", 3: "Deleted"}.get(obj.action_flag, obj.action_flag)
+    action_flag_display.short_description = "Action"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

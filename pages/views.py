@@ -1,12 +1,12 @@
 from django.contrib import messages
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from catalog.models import Category, Product
 
 from .forms import ContactForm, NewsletterForm
-from .models import NewsletterSubscriber
+from .models import FAQItem, NewsletterSubscriber, PolicyPage
 
 
 def home(request):
@@ -27,6 +27,16 @@ def home(request):
 
 def about(request):
     return render(request, "pages/about.html")
+
+
+def policy_page(request, kind):
+    policy = get_object_or_404(PolicyPage, kind=kind)
+    return render(request, "pages/policy_page.html", {"policy": policy})
+
+
+def faq(request):
+    items = FAQItem.objects.filter(is_active=True)
+    return render(request, "pages/faq.html", {"items": items})
 
 
 def contact(request):

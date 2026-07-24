@@ -3,12 +3,14 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeDoneView, PasswordChangeView
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 
 from orders.models import Order
 
 from .forms import SignUpForm, StyledPasswordChangeForm
+from .models import Notification
 
 
 class CustomerLoginView(LoginView):
@@ -49,3 +51,19 @@ def signup(request):
 def dashboard(request):
     orders = Order.objects.filter(customer=request.user)
     return render(request, "accounts/dashboard.html", {"orders": orders})
+
+
+@login_required
+def notifications(request):
+    items = request.user.notifications.all()
+    items.filter(is_read=False).update(is_read=True)
+    return render(request, "accounts/notifications.html", {"notifications": items})
+
+
+@login_required
+@require_POST
+def notification_read(request, pk):
+    notification = get_object_or_404(Notification, pk=pk, user=request.user)
+    notification.is_read = True
+    notification.save(update_fields=["is_read"])
+    return redirect(notification.link or "accounts:notifications")
