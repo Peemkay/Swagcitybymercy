@@ -8,6 +8,10 @@
         <p>Welcome back, {{ user.first_name|default:user.username }}.</p>
     </div>
 
+    <div class="text-center mb-5 reveal">
+        <a href="{% url 'accounts:password_change' %}" class="btn btn-scm-outline"><i class="bi bi-shield-lock"></i> Change Password</a>
+    </div>
+
     {% if orders %}
     <div class="table-responsive reveal">
         <table class="table align-middle">
